@@ -1,0 +1,16 @@
+[package]
+name = "lipl-display-femtovg"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+env_logger = "0.11.11"
+femtovg = "0.27.0"
+futures-util = "0.3.34"
+glutin = { version = "0.32.3", default-features = false, features = ["egl", "wayland"] }
+glutin-winit = "0.5.0"
+lipl-display-common = "0.4.8"
+lipl-gatt-zbus = "0.4.8"
+log = "0.4.34"
+tokio = { version = "1.53.1", features = ["macros"] }
+winit = { version = "0.30.13", default-features = false }
