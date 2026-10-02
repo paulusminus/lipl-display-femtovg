@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+
 use std::error::Error;
 
 use femtovg::{Canvas, Color, FontId, Paint, renderer::OpenGl};
