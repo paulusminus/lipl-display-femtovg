@@ -453,6 +453,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "deserialize-lines"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8565cbe6f9c6d0125b8c0a57dd8a7616adebb0d563f9a97d24ae0de4e715944c"
+dependencies = [
+ "futures-util",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-stream",
+]
+
+[[package]]
 name = "dispatch"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1064,18 +1077,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "json-lines"
-version = "0.1.0"
-source = "git+https://github.com/paulusminus/json-lines#026bce8fb9c370c25c0c26808404c52890d20b4a"
-dependencies = [
- "futures-util",
- "serde",
- "serde_json",
- "tokio",
- "tokio-stream",
-]
-
-[[package]]
 name = "khronos_api"
 version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1140,14 +1141,14 @@ dependencies = [
 
 [[package]]
 name = "lipl-display-femtovg"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
+ "deserialize-lines",
  "env_logger",
  "femtovg",
  "futures-util",
  "glutin",
  "glutin-winit",
- "json-lines",
  "lipl-display-common",
  "lipl-gatt-zbus",
  "log",

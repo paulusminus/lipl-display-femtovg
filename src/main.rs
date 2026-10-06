@@ -30,8 +30,8 @@ fn listener() -> lipl_gatt_zbus::GattListener {
 
 #[cfg(not(feature = "gatt"))]
 fn listener() -> impl futures_util::TryStream<Ok = Message, Error = std::io::Error> {
+    use deserialize_lines::lines;
     use futures_util::{FutureExt, StreamExt};
-    use json_lines::lines;
     use std::time::Duration;
     lines::<Message, _>(include_bytes!("../lipl-gatt-input.txt").as_ref())
         .and_then(|value| tokio::time::sleep(Duration::from_secs(DELAY_SECONDS)).map(|_| Ok(value)))
