@@ -15,8 +15,6 @@ const DEFAULT_FONT_SIZE: f32 = 32.0;
 const BLACK: femtovg::Color = femtovg::Color::black();
 const WHITE: femtovg::Color = femtovg::Color::white();
 
-#[allow(dead_code)]
-mod gatt_client;
 mod helpers;
 
 fn get_colors(dark: bool) -> (Color, Color) {
@@ -32,14 +30,11 @@ fn listener() -> impl TryStream<Ok = Message, Error = std::io::Error> {
 
 #[cfg(not(feature = "gatt"))]
 fn listener() -> impl TryStream<Ok = Message, Error = std::io::Error> {
-    use futures_util::StreamExt;
+    use futures_util::{FutureExt, StreamExt};
     use json_lines::lines;
     use std::time::Duration;
     lines::<Message, _>(include_bytes!("../lipl-gatt-input.txt").as_ref())
-        .and_then(|value| async move {
-            tokio::time::sleep(Duration::from_secs(1)).await;
-            Result::<Message, std::io::Error>::Ok(value)
-        })
+        .and_then(|value| tokio::time::sleep(Duration::from_secs(1)).map(|_| Ok(value)))
         .boxed()
 }
 
@@ -47,7 +42,6 @@ fn listener() -> impl TryStream<Ok = Message, Error = std::io::Error> {
 async fn main() -> Result<(), Box<dyn Error>> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("trace")).init();
     let event_loop = EventLoop::<Message>::with_user_event().build()?;
-
     let proxy = event_loop.create_proxy();
 
     tokio::spawn(async move {
