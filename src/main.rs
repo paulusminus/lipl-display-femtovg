@@ -1,13 +1,11 @@
 #![doc = include_str!("../README.md")]
 
-use std::error::Error;
-
 use femtovg::{Canvas, Color, FontId, Paint, renderer::OpenGl};
-use futures_util::StreamExt;
+use futures_util::{TryStream, TryStreamExt};
 use glutin::surface::GlSurface;
 use lipl_display_common::{Command, HandleMessage, LiplScreen, Message};
-use lipl_gatt_zbus::GattListener;
 use log::error;
+use std::error::Error;
 use winit::{
     application::ApplicationHandler, dpi::PhysicalSize, event::WindowEvent, event_loop::EventLoop,
 };
@@ -25,7 +23,27 @@ fn get_colors(dark: bool) -> (Color, Color) {
     if dark { (WHITE, BLACK) } else { (BLACK, WHITE) }
 }
 
-#[tokio::main]
+#[cfg(feature = "gatt")]
+fn listener() -> impl TryStream<Ok = Message, Error = std::io::Error> {
+    use futures_util::StreamExt;
+    use lipl_gatt_zbus::GattListener;
+    GattListener::default().map(Result::<Message, std::io::Error>::Ok)
+}
+
+#[cfg(not(feature = "gatt"))]
+fn listener() -> impl TryStream<Ok = Message, Error = std::io::Error> {
+    use futures_util::StreamExt;
+    use json_lines::lines;
+    use std::time::Duration;
+    lines::<Message, _>(include_bytes!("../lipl-gatt-input.txt").as_ref())
+        .and_then(|value| async move {
+            tokio::time::sleep(Duration::from_secs(1)).await;
+            Result::<Message, std::io::Error>::Ok(value)
+        })
+        .boxed()
+}
+
+#[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn Error>> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("trace")).init();
     let event_loop = EventLoop::<Message>::with_user_event().build()?;
@@ -33,15 +51,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let proxy = event_loop.create_proxy();
 
     tokio::spawn(async move {
-        let mut listener = GattListener::default();
-        while let Some(event) = listener.next().await {
-            if let Err(error) = proxy.send_event(event) {
+        let mut listener = listener();
+        while let Ok(Some(message)) = listener.try_next().await {
+            if let Err(error) = proxy.send_event(message) {
                 error!("Error sending to main loop: {error}");
                 break;
             }
-        }
-        if let Err(error) = listener.await {
-            error!("Error listening to GATT events: {error}");
         }
     });
 

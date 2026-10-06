@@ -1,7 +1,21 @@
 [package]
+authors = ["Paul Min"]
 name = "lipl-display-femtovg"
+description = "Showing parts of lyrics received from Gatt Peripheral"
+license = "MIT"
 version = "0.1.0"
 edition = "2024"
+
+[profile.release]
+lto = true
+strip = true
+codegen-units = 1
+debug = false
+opt-level = "s"
+
+[features]
+default = ["gatt"]
+gatt = ["dep:lipl-gatt-zbus"]
 
 [dependencies]
 env_logger = "0.11.11"
@@ -9,8 +23,9 @@ femtovg = "0.27.0"
 futures-util = "0.3.34"
 glutin = { version = "0.32.3", default-features = false, features = ["egl", "wayland"] }
 glutin-winit = "0.5.0"
+json-lines = { git = "https://github.com/paulusminus/json-lines" }
 lipl-display-common = "0.4.8"
-lipl-gatt-zbus = "0.4.8"
+lipl-gatt-zbus = { version = "0.4.8", optional = true }
 log = "0.4.34"
-tokio = { version = "1.53.1", features = ["macros"] }
+tokio = { version = "1.53.1", features = ["macros", "rt"] }
 winit = { version = "0.30.13", default-features = false }
