@@ -5,7 +5,7 @@ use futures_util::TryStreamExt;
 use glutin::surface::GlSurface;
 use lipl_display_common::{Command, HandleMessage, LiplScreen, Message};
 use log::error;
-use std::error::Error;
+use std::{error::Error, thread};
 use winit::{
     application::ApplicationHandler, dpi::PhysicalSize, event::WindowEvent, event_loop::EventLoop,
 };
@@ -31,30 +31,37 @@ fn listener() -> lipl_gatt_zbus::GattListener {
 #[cfg(not(feature = "gatt"))]
 fn listener() -> impl futures_util::TryStream<Ok = Message, Error = std::io::Error> {
     use deserialize_lines::lines;
-    use futures_util::{FutureExt, StreamExt};
+    use futures_util::StreamExt;
     use std::time::Duration;
+    use tokio_stream::StreamExt as _;
     lines::<Message, _>(include_bytes!("../lipl-gatt-input.txt").as_ref())
-        .and_then(|value| tokio::time::sleep(Duration::from_secs(DELAY_SECONDS)).map(|_| Ok(value)))
+        .into_stream()
+        .throttle(Duration::from_secs(DELAY_SECONDS))
         .boxed()
 }
 
-#[tokio::main(flavor = "current_thread")]
-async fn main() -> Result<(), Box<dyn Error>> {
-    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("trace")).init();
+fn main() -> Result<(), Box<dyn Error>> {
+    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
     let event_loop = EventLoop::<Message>::with_user_event().build()?;
     let proxy = event_loop.create_proxy();
 
-    tokio::spawn(async move {
-        let mut listener = listener();
-        while let Ok(Some(message)) = listener.try_next().await {
-            if let Err(error) = proxy.send_event(message) {
-                error!("Error sending to main loop: {error}");
-                break;
-            }
-        }
-
-        #[cfg(feature = "gatt")]
-        let _ = listener.await;
+    thread::spawn(|| {
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap()
+            .block_on(async move {
+                let mut listener = listener();
+                while let Ok(Some(message)) = listener.try_next().await {
+                    println!("Message = {}", message);
+                    if let Err(error) = proxy.send_event(message) {
+                        error!("Error sending to main loop: {error}");
+                        break;
+                    }
+                }
+                #[cfg(feature = "gatt")]
+                let _ = listener.await;
+            });
     });
 
     event_loop.run_app(&mut Application::default())?;
