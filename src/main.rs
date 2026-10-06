@@ -1,9 +1,11 @@
 #![doc = include_str!("../README.md")]
 
 use femtovg::{Canvas, Color, FontId, Paint, renderer::OpenGl};
-use futures_util::{TryStream, TryStreamExt};
+use futures_util::TryStreamExt;
 use glutin::surface::GlSurface;
 use lipl_display_common::{Command, HandleMessage, LiplScreen, Message};
+#[cfg(feature = "gatt")]
+use lipl_gatt_zbus::GattListener;
 use log::error;
 use std::error::Error;
 use winit::{
@@ -14,6 +16,8 @@ const ROBOTO_REGULAR: &[u8] = include_bytes!("../assets/Roboto-Regular.ttf");
 const DEFAULT_FONT_SIZE: f32 = 32.0;
 const BLACK: femtovg::Color = femtovg::Color::black();
 const WHITE: femtovg::Color = femtovg::Color::white();
+#[cfg(not(feature = "gatt"))]
+const DELAY_SECONDS: u64 = 1;
 
 mod helpers;
 
@@ -22,10 +26,8 @@ fn get_colors(dark: bool) -> (Color, Color) {
 }
 
 #[cfg(feature = "gatt")]
-fn listener() -> impl TryStream<Ok = Message, Error = std::io::Error> {
-    use futures_util::StreamExt;
-    use lipl_gatt_zbus::GattListener;
-    GattListener::default().map(Result::<Message, std::io::Error>::Ok)
+fn listener() -> GattListener {
+    lipl_gatt_zbus::GattListener::default()
 }
 
 #[cfg(not(feature = "gatt"))]
@@ -34,7 +36,7 @@ fn listener() -> impl TryStream<Ok = Message, Error = std::io::Error> {
     use json_lines::lines;
     use std::time::Duration;
     lines::<Message, _>(include_bytes!("../lipl-gatt-input.txt").as_ref())
-        .and_then(|value| tokio::time::sleep(Duration::from_secs(1)).map(|_| Ok(value)))
+        .and_then(|value| tokio::time::sleep(Duration::from_secs(DELAY_SECONDS)).map(|_| Ok(value)))
         .boxed()
 }
 
@@ -52,6 +54,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 break;
             }
         }
+
+        #[cfg(feature = "gatt")]
+        let _ = listener.await;
     });
 
     event_loop.run_app(&mut Application::default())?;

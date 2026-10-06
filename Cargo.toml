@@ -25,7 +25,7 @@ glutin = { version = "0.32.3", default-features = false, features = ["egl", "way
 glutin-winit = "0.5.0"
 json-lines = { git = "https://github.com/paulusminus/json-lines" }
 lipl-display-common = "0.4.8"
-lipl-gatt-zbus = { version = "0.4.8", optional = true }
+lipl-gatt-zbus = { version = "0.5.0", optional = true }
 log = "0.4.34"
 tokio = { version = "1.53.1", features = ["macros", "rt"] }
 winit = { version = "0.30.13", default-features = false }
