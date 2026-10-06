@@ -3,7 +3,7 @@ authors = ["Paul Min"]
 name = "lipl-display-femtovg"
 description = "Showing parts of lyrics received from Gatt Peripheral"
 license = "MIT"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2024"
 
 [profile.release]
@@ -13,7 +13,7 @@ debug = false
 opt-level = "s"
 
 [features]
-default = ["gatt"]
+default = []
 gatt = ["dep:lipl-gatt-zbus"]
 
 [dependencies]
