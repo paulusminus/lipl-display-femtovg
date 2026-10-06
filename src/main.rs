@@ -4,8 +4,6 @@ use femtovg::{Canvas, Color, FontId, Paint, renderer::OpenGl};
 use futures_util::TryStreamExt;
 use glutin::surface::GlSurface;
 use lipl_display_common::{Command, HandleMessage, LiplScreen, Message};
-#[cfg(feature = "gatt")]
-use lipl_gatt_zbus::GattListener;
 use log::error;
 use std::error::Error;
 use winit::{
@@ -26,12 +24,12 @@ fn get_colors(dark: bool) -> (Color, Color) {
 }
 
 #[cfg(feature = "gatt")]
-fn listener() -> GattListener {
+fn listener() -> lipl_gatt_zbus::GattListener {
     lipl_gatt_zbus::GattListener::default()
 }
 
 #[cfg(not(feature = "gatt"))]
-fn listener() -> impl TryStream<Ok = Message, Error = std::io::Error> {
+fn listener() -> impl futures_util::TryStream<Ok = Message, Error = std::io::Error> {
     use futures_util::{FutureExt, StreamExt};
     use json_lines::lines;
     use std::time::Duration;
