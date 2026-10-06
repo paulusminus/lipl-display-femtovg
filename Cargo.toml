@@ -8,7 +8,6 @@ edition = "2024"
 
 [profile.release]
 lto = true
-strip = true
 codegen-units = 1
 debug = false
 opt-level = "s"
