@@ -4,7 +4,7 @@ use femtovg::{Canvas, Color, FontId, Paint, renderer::OpenGl};
 use futures_util::TryStreamExt;
 use glutin::surface::GlSurface;
 use lipl_display_common::{Command, HandleMessage, LiplScreen, Message};
-use log::error;
+use log::{debug, error, info};
 use std::{error::Error, thread};
 use winit::{
     application::ApplicationHandler, dpi::PhysicalSize, event::WindowEvent, event_loop::EventLoop,
@@ -53,7 +53,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             .block_on(async move {
                 let mut listener = listener();
                 while let Ok(Some(message)) = listener.try_next().await {
-                    println!("Message = {}", message);
+                    info!("Message = {}", message);
                     if let Err(error) = proxy.send_event(message) {
                         error!("Error sending to main loop: {error}");
                         break;
@@ -138,14 +138,14 @@ impl Application {
             match graphics.canvas.fill_text(x, y, &self.screen.status, &paint) {
                 Ok(_) => {}
                 Err(e) => {
-                    eprintln!("Error: {e}");
+                    error!("Error: {e}");
                 }
             }
 
             graphics.canvas.flush();
 
             if let Err(error) = graphics.surface.swap_buffers(&graphics.context) {
-                log::error!("Cannot swap buffers: {error}");
+                error!("Cannot swap buffers: {error}");
             }
         }
     }
@@ -170,7 +170,7 @@ impl Application {
 
 impl ApplicationHandler<Message> for Application {
     fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
-        log::info!("resumed");
+        info!("resumed");
         let (mut canvas, window, context, surface) =
             helpers::create_window("Lipl Display", event_loop);
         let font_id = canvas.add_font_mem(ROBOTO_REGULAR).ok().unwrap();
@@ -199,18 +199,18 @@ impl ApplicationHandler<Message> for Application {
                 scale_factor,
                 inner_size_writer: _,
             } => {
-                log::info!("window_event scalefactorchanged {scale_factor}");
+                info!("window_event scalefactorchanged {scale_factor}");
             }
             WindowEvent::Resized(physical_size) => {
-                log::info!("window_event: resized");
+                info!("window_event: resized");
                 self.resize(physical_size);
             }
             WindowEvent::CloseRequested => {
-                log::debug!("window_event close");
+                debug!("window_event close");
                 event_loop.exit();
             }
             _ => {
-                log::debug!("window_event {event:#?}");
+                debug!("window_event {event:#?}");
             }
         }
     }
@@ -220,11 +220,11 @@ impl ApplicationHandler<Message> for Application {
         _event_loop: &winit::event_loop::ActiveEventLoop,
         cause: winit::event::StartCause,
     ) {
-        log::debug!("new_events {cause:#?}");
+        debug!("new_events {cause:#?}");
     }
 
     fn user_event(&mut self, event_loop: &winit::event_loop::ActiveEventLoop, event: Message) {
-        log::info!("user_event: {event}");
+        info!("user_event: {event}");
         if [
             Message::Command(Command::Exit),
             Message::Command(Command::Poweroff),
@@ -243,11 +243,11 @@ impl ApplicationHandler<Message> for Application {
         device_id: winit::event::DeviceId,
         _event: winit::event::DeviceEvent,
     ) {
-        log::debug!("device_event {device_id:?}");
+        debug!("device_event {device_id:?}");
     }
 
     fn about_to_wait(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {
-        log::info!("About to wait");
+        info!("About to wait");
         self.draw();
     }
 
