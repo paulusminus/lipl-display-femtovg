@@ -454,14 +454,12 @@ dependencies = [
 
 [[package]]
 name = "deserialize-lines"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb9a3f841021b29fe74a01aca494afa769fde0cb0a6fb6e96a7133b47dc015f5"
+checksum = "965e273deeff6e2f3320f8dca0b719a1e097806fc7d306997de2d9a838a6c646"
 dependencies = [
  "futures-util",
  "pin-project",
- "tokio",
- "tokio-stream",
 ]
 
 [[package]]
