@@ -454,13 +454,12 @@ dependencies = [
 
 [[package]]
 name = "deserialize-lines"
-version = "0.1.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8565cbe6f9c6d0125b8c0a57dd8a7616adebb0d563f9a97d24ae0de4e715944c"
+checksum = "eb9a3f841021b29fe74a01aca494afa769fde0cb0a6fb6e96a7133b47dc015f5"
 dependencies = [
  "futures-util",
- "serde",
- "serde_json",
+ "pin-project",
  "tokio",
  "tokio-stream",
 ]
@@ -1152,6 +1151,7 @@ dependencies = [
  "lipl-display-common",
  "lipl-gatt-zbus",
  "log",
+ "serde_json",
  "tokio",
  "tokio-stream",
  "winit",
