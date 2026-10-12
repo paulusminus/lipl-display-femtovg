@@ -18,7 +18,7 @@ gatt = ["dep:lipl-gatt-zbus"]
 
 [dependencies]
 env_logger = "0.11.11"
-deserialize-lines = "0.4.0"
+parse-lines = "0.1.0"
 femtovg = "0.27.0"
 futures-util = "0.3.34"
 glutin = { version = "0.32.3", default-features = false, features = ["egl", "wayland"] }
