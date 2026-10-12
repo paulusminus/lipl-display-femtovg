@@ -31,14 +31,13 @@ fn listener() -> lipl_gatt_zbus::GattListener {
 #[cfg(not(feature = "gatt"))]
 fn listener() -> impl futures_util::TryStream<Ok = Message, Error = std::io::Error> {
     use futures_util::StreamExt;
-    use parse_lines::{ErrIntoIO, ParseLines, Parser};
+    use parse_lines::ParseLines;
     use serde_json::from_str;
     use std::time::Duration;
     use tokio_stream::StreamExt as _;
-    let parser: Parser<Message> = |s| from_str(&s).err_into_io();
     include_str!("../lipl-gatt-input.txt")
         .as_bytes()
-        .parse_lines(parser)
+        .parse_lines(|s| from_str::<Message>(&s))
         .throttle(Duration::from_secs(DELAY_SECONDS))
         .boxed()
 }
