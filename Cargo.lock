@@ -1566,9 +1566,9 @@ checksum = "f38d5652c16fde515bb1ecef450ab0f6a219d619a7274976324d5e377f7dceba"
 
 [[package]]
 name = "parse-lines"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9bc9c9544f96912bb031537d3a0e1bc8d48435858a58a3931e8489d875ff7eb5"
+checksum = "65b725bb4f584eda2576f72294e1bf4fb37b976cc83750420f5a6de13c52edc5"
 dependencies = [
  "futures-util",
  "pin-project",
